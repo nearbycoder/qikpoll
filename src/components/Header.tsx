@@ -8,7 +8,7 @@ export default function Header() {
       <div className="topbar-inner">
         <Link to="/" className="brand-link">
           <span className="brand-mark" aria-hidden>
-            QP
+            <img src="/favicon.svg" alt="" />
           </span>
           <span className="brand-copy">
             <strong>QikPoll</strong>

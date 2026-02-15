@@ -2,51 +2,84 @@
 
 Anonymous polls that just work.
 
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111)
+![TanStack Start](https://img.shields.io/badge/TanStack-Start-ff5f45)
+![Redis](https://img.shields.io/badge/Redis-Cache-red?logo=redis&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-Runtime-black?logo=bun&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
+![WebSockets](https://img.shields.io/badge/Realtime-WebSockets-0ea5e9)
+
 ![QikPoll home screen](./public/readme.png)
 
 ## Overview
 
-QikPoll is a StrawPoll-style app for fast, no-signup polling. Anyone can create a poll, share a link, and watch results update live.
+QikPoll is a StrawPoll-style app for fast, no-signup polling. Anyone can create a poll, share a link, and watch results update live in real time.
 
-## Features
+## Core features
 
-- Create polls in seconds with 2-8 options
-- Public or private visibility
-  - `public`: appears in the recent polls feed
-  - `private`: unlisted, direct-link only
-- Anonymous voting with anti-repeat protections
-  - hashed IP checks
-  - browser fingerprint signals
-  - anonymous visitor cookie
-  - vote-attempt rate limiting
-- Live updates over WebSockets
-  - poll result cards update instantly after votes
-  - recent public polls feed updates when public polls are created or voted
-- Redis-backed persistence with automatic expiration (TTL)
-- No account required
+- Create polls in seconds with 2 to 8 options.
+- Use `public` visibility to list polls in the home feed.
+- Use `private` visibility for unlisted direct-link access.
+- Anonymous voting with anti-repeat guardrails.
+- Live vote updates on poll pages via WebSockets.
+- Live updates for the recent public poll feed.
+- Redis-backed storage with TTL expiration.
 
-## Stack
+## Technology stack
 
-- TanStack Start (React + server routes)
-- Redis
-- Bun + Vite
-- TypeScript
+| Area | Technology |
+| --- | --- |
+| Runtime | Bun |
+| Language | TypeScript |
+| Frontend | React 19 |
+| App framework | TanStack Start + TanStack Router |
+| Styling/UI | CSS + Lucide icons |
+| Data store | Redis 5 |
+| Realtime | WebSockets + Redis Pub/Sub |
+| Build tooling | Vite 7 |
+| Quality tooling | Biome + Vitest |
+
+## Architecture
+
+- `src/routes/index.tsx`: Home screen, poll creation, and recent public polls feed.
+- `src/routes/p/$pollId.tsx`: Poll voting page with live results.
+- `src/routes/api/polls.tsx`: Poll create/fetch/list handlers.
+- `src/routes/api/polls.vote.tsx`: Vote submission endpoint.
+- `src/routes/api/live.tsx`: WebSocket upgrade endpoint.
+- `src/lib/server/polls.ts`: Poll domain logic, vote restrictions, rate limiting.
+- `src/lib/server/poll-live.ts`: Pub/Sub fanout for realtime updates.
+- `src/lib/server/redis.ts`: Shared Redis client.
+
+## Redis data model
+
+- `poll:<id>` stores the poll JSON document.
+- `poll:index:public` stores recent public poll IDs in a sorted set.
+- `poll:vote:fp:<pollId>:<fingerprintHash>` enforces one vote per fingerprint.
+- `poll:vote:ip:<pollId>:<ipHash>` adds one-vote guardrail by hashed IP.
+- `poll:rate:create:<ipHash>` limits poll creation bursts.
+- `poll:rate:vote:<pollId>:<ipHash>` limits vote-attempt bursts.
+
+## Realtime channels
+
+- `GET /api/live?pollId=<pollId>` streams per-poll vote updates.
+- `GET /api/live?stream=public` streams recent public poll feed updates.
 
 ## Local setup
 
-1. Install dependencies:
+1. Install dependencies.
 
 ```bash
 bun install
 ```
 
-2. Start Redis locally (if not running already):
+2. Start Redis locally.
 
 ```bash
 redis-server
 ```
 
-3. Create `.env`:
+3. Create `.env`.
 
 ```bash
 REDIS_URL=redis://localhost:6379
@@ -54,31 +87,41 @@ POLL_TTL_SECONDS=604800
 POLL_FINGERPRINT_SALT=change-me-in-production
 ```
 
-4. Start dev server:
+4. Start the app.
 
 ```bash
 bun --bun run dev
 ```
 
-App runs at [http://localhost:3000](http://localhost:3000).
+App URL: [http://localhost:3000](http://localhost:3000)
 
 ## API endpoints
 
-- `POST /api/polls` create poll
-- `GET /api/polls?id=<pollId>` fetch poll details
-- `GET /api/polls?limit=<n>` list recent public polls
-- `POST /api/polls/vote` submit vote
-- `GET /api/live?pollId=<pollId>` websocket stream for per-poll updates
-- `GET /api/live?stream=public` websocket stream for recent public poll list updates
+- `POST /api/polls` creates a poll.
+- `GET /api/polls?id=<pollId>` fetches a poll by ID.
+- `GET /api/polls?limit=<n>` lists recent public polls.
+- `POST /api/polls/vote` submits a vote.
+- `GET /api/live?pollId=<pollId>` upgrades to poll websocket stream.
+- `GET /api/live?stream=public` upgrades to public feed websocket stream.
 
-## Build
+## Environment variables
 
-```bash
-bun --bun run build
-```
+- `REDIS_URL` required Redis connection URL.
+- `POLL_TTL_SECONDS` poll and vote lock expiration in seconds.
+- `POLL_FINGERPRINT_SALT` salt used in hashing anti-abuse identifiers.
 
-## Notes
+## Scripts
 
-- Raw IP addresses are not stored in Redis.
-- Vote writes are atomic via Redis Lua script.
-- Poll and vote keys expire automatically based on TTL.
+- `bun --bun run dev` start dev server.
+- `bun --bun run build` build for production.
+- `bun --bun run preview` run preview server.
+- `bun --bun run test` run tests.
+- `bun --bun run lint` run lint checks.
+- `bun --bun run check` run full Biome checks.
+- `bun --bun run format` format code.
+
+## Security and fairness notes
+
+- Raw IP addresses are not stored; only salted hashes are used.
+- Vote writes are atomic using a Redis Lua script to reduce race-condition double-votes.
+- Poll and vote lock keys share TTL expiration behavior.
