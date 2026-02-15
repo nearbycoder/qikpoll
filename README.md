@@ -2,7 +2,7 @@
 
 Anonymous polls that just work.
 
-![QikPoll home screen](./public/readme-preview.svg)
+![QikPoll home screen](./public/readme.png)
 
 ## Overview
 
