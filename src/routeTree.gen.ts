@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PPollIdRouteImport } from './routes/p/$pollId'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as ApiPollsRouteImport } from './routes/api/polls'
+import { Route as ApiMcpRouteImport } from './routes/api/mcp'
 import { Route as ApiLiveRouteImport } from './routes/api/live'
 import { Route as ApiPollsVoteRouteImport } from './routes/api/polls.vote'
 
@@ -36,6 +37,11 @@ const ApiPollsRoute = ApiPollsRouteImport.update({
   path: '/api/polls',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMcpRoute = ApiMcpRouteImport.update({
+  id: '/api/mcp',
+  path: '/api/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLiveRoute = ApiLiveRouteImport.update({
   id: '/api/live',
   path: '/api/live',
@@ -50,6 +56,7 @@ const ApiPollsVoteRoute = ApiPollsVoteRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/live': typeof ApiLiveRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/api/polls': typeof ApiPollsRouteWithChildren
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/p/$pollId': typeof PPollIdRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/live': typeof ApiLiveRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/api/polls': typeof ApiPollsRouteWithChildren
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/p/$pollId': typeof PPollIdRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/live': typeof ApiLiveRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/api/polls': typeof ApiPollsRouteWithChildren
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/p/$pollId': typeof PPollIdRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/api/live'
+    | '/api/mcp'
     | '/api/polls'
     | '/demo/tanstack-query'
     | '/p/$pollId'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/api/live'
+    | '/api/mcp'
     | '/api/polls'
     | '/demo/tanstack-query'
     | '/p/$pollId'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/api/live'
+    | '/api/mcp'
     | '/api/polls'
     | '/demo/tanstack-query'
     | '/p/$pollId'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiLiveRoute: typeof ApiLiveRoute
+  ApiMcpRoute: typeof ApiMcpRoute
   ApiPollsRoute: typeof ApiPollsRouteWithChildren
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   PPollIdRoute: typeof PPollIdRoute
@@ -137,6 +150,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPollsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/mcp': {
+      id: '/api/mcp'
+      path: '/api/mcp'
+      fullPath: '/api/mcp'
+      preLoaderRoute: typeof ApiMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/live': {
       id: '/api/live'
       path: '/api/live'
@@ -169,6 +189,7 @@ const ApiPollsRouteWithChildren = ApiPollsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiLiveRoute: ApiLiveRoute,
+  ApiMcpRoute: ApiMcpRoute,
   ApiPollsRoute: ApiPollsRouteWithChildren,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   PPollIdRoute: PPollIdRoute,

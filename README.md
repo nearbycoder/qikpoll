@@ -101,8 +101,40 @@ App URL: [http://localhost:3000](http://localhost:3000)
 - `GET /api/polls?id=<pollId>` fetches a poll by ID.
 - `GET /api/polls?limit=<n>` lists recent public polls.
 - `POST /api/polls/vote` submits a vote.
+- `POST /api/mcp` MCP JSON-RPC endpoint for remote MCP clients.
 - `GET /api/live?pollId=<pollId>` upgrades to poll websocket stream.
 - `GET /api/live?stream=public` upgrades to public feed websocket stream.
+
+## MCP server
+
+This repo includes an MCP endpoint served by the same TanStack Start server:
+`/api/mcp`.
+It calls the existing poll logic, so MCP users do not need direct Redis access.
+
+Tools exposed:
+
+- `create_poll` create a poll (`title`, `options`, optional `visibility`).
+- `list_public_polls` list public polls (`limit` optional).
+- `get_poll` fetch poll details and current results by `pollId`.
+- `vote_poll` submit vote (`pollId`, `optionId`).
+
+Example OpenCode remote MCP config (`~/.config/opencode/opencode.json`):
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "qikpoll": {
+      "type": "remote",
+      "url": "https://your-qikpoll-app.example.com/api/mcp",
+      "enabled": true
+    }
+  }
+}
+```
+
+Use your deployed app URL for `url`.
+This OpenCode setup uses a remote MCP endpoint hosted by your app server.
 
 ## Environment variables
 
@@ -115,6 +147,7 @@ App URL: [http://localhost:3000](http://localhost:3000)
 - `bun --bun run dev` start dev server.
 - `bun --bun run build` build for production.
 - `bun --bun run preview` run preview server.
+- `bun --bun run mcp` optional standalone stdio MCP server for local testing.
 - `bun --bun run test` run tests.
 - `bun --bun run lint` run lint checks.
 - `bun --bun run check` run full Biome checks.
